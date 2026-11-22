@@ -162,6 +162,15 @@ footer b{display:block;font:400 1.3rem var(--serif);color:var(--ivory);letter-sp
     </div>
   </section>
 
+  <section id="micita" hidden>
+    <div class="wrap">
+      <h2>Tu cita</h2>
+      <p class="intro" id="micitaTxt">Cargando…</p>
+      <button class="btn" id="cancelar" type="button" hidden>Cancelar mi cita</button>
+      <p class="resumen" id="micitaRes" role="status"></p>
+    </div>
+  </section>
+
   <section id="reservar">
     <div class="wrap reserva">
       <h2>Reserva tu cita</h2>
@@ -173,6 +182,9 @@ footer b{display:block;font:400 1.3rem var(--serif);color:var(--ivory);letter-sp
       <input id="nombre" type="text" autocomplete="given-name" placeholder="Nombre">
       <h3><label for="tel">Tu teléfono</label></h3>
       <input id="tel" type="tel" autocomplete="tel" placeholder="600 000 000">
+      <h3><label for="email">Tu correo (te enviamos la confirmación)</label></h3>
+      <input id="email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com">
+      <input id="web" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
       <h3><label for="nota">¿Quieres contarnos algo? (opcional)</label></h3>
       <textarea id="nota" rows="3" placeholder="Por ejemplo: el corte o el color que te gusta"></textarea>
       <p class="resumen" id="resumen" aria-live="polite"></p>
@@ -222,48 +234,72 @@ for(var i=0;i<16;i++){var c=t[(i*3)%t.length];h+='<figure style="--c1:'+c[0]+';-
 g.innerHTML=h;
 </script>
 <script>
-// HORARIO: días de la semana (0 = domingo) con las horas de inicio de cada cita. Un día sin horas está cerrado.
+// HORARIO (H): por día de la semana (0 = domingo), los tramos de trabajo ["inicio","fin"]. Sin tramos = cerrado. PASO = minutos entre horas de inicio. Cada servicio tiene su duración m (minutos).
+// HORARIO antiguo: días de la semana (0 = domingo) con las horas de inicio de cada cita. Un día sin horas está cerrado.
 // OCUPADAS: citas ya cogidas, con el formato "2026-11-24 10:00".
-var S=[{n:"Corte caballero",p:14},{n:"Corte + barba",p:20},{n:"Corte señora",p:25},{n:"Tinte",p:35},{n:"Mechas / balayage",p:60}];
-var A=[10,11,12,13,16,17,18,19],H={1:A,2:A,3:A,4:A,5:A,6:[10,11,12,13]},O=[];
+var S=[{n:"Corte caballero",p:14,m:30},{n:"Corte + barba",p:20,m:45},{n:"Corte señora",p:25,m:45},{n:"Tinte",p:35,m:90},{n:"Mechas / balayage",p:60,m:150}];
+var A=[["10:00","14:00"],["16:00","20:00"]],H={1:A,2:A,3:A,4:A,5:A,6:[["10:00","14:00"]]},O=[],PASO=30;
 var st={s:null,d:null,h:null},$=function(i){return document.getElementById(i)};
 function key(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
 function opt(t,on,fn,dis){var b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;b.setAttribute("aria-pressed",on);b.disabled=!!dis;b.onclick=fn;return b}
 function fecha(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function mn(h){var p=h.split(":");return +p[0]*60+ +p[1]}
+function hm(a){return ("0"+Math.floor(a/60)).slice(-2)+":"+("0"+a%60).slice(-2)}
 function render(){
   var sv=$("svc"),dy=$("days"),hr=$("hours"),now=new Date();
   sv.innerHTML="";dy.innerHTML="";hr.innerHTML="";
-  S.forEach(function(x,i){sv.appendChild(opt(x.n+" · "+x.p+" €",st.s===i,function(){st.s=i;render()}))});
+  S.forEach(function(x,i){sv.appendChild(opt(x.n+" · "+x.p+" €",st.s===i,function(){st.s=i;st.h=null;render()}))});
   for(var i=0;i<28;i++){var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);if(!H[d.getDay()])continue;
     (function(d){var k=key(d);dy.appendChild(opt(d.toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short"}),st.d===k,function(){st.d=k;st.h=null;render()}))})(d);}
-  if(!st.d){hr.innerHTML='<span class="hint">Elige primero un día.</span>'}
-  else{(H[fecha(st.d).getDay()]||[]).forEach(function(h){var t=("0"+h).slice(-2)+":00",past=st.d===key(now)&&h<=now.getHours(),busy=O.indexOf(st.d+" "+t)>-1;
-    hr.appendChild(opt(t,st.h===t,function(){st.h=t;render()},past||busy))})}
+  if(st.s===null||!st.d){hr.innerHTML='<span class="hint">Elige primero el servicio y el día.</span>'}
+  else{var dur=S[st.s].m,hoy=st.d===key(now),nm=now.getHours()*60+now.getMinutes(),any=false;
+    (H[fecha(st.d).getDay()]||[]).forEach(function(b){for(var a=mn(b[0]);a+dur<=mn(b[1]);a+=PASO){
+      var busy=O.some(function(o){return o.d===st.d&&a<mn(o.h)+o.m&&mn(o.h)<a+dur});
+      if(busy||(hoy&&a<=nm))continue;any=true;
+      (function(t){hr.appendChild(opt(t,st.h===t,function(){st.h=t;render()}))})(hm(a))}});
+    if(!any)hr.innerHTML='<span class="hint">No quedan horas libres ese día.</span>'}
   upd();
 }
 function upd(){
-  var n=$("nombre").value.trim(),t=$("tel").value.trim(),ok=st.s!==null&&st.d&&st.h&&n&&t,a=$("enviar"),r=$("resumen");
+  var n=$("nombre").value.trim(),t=$("tel").value.trim(),e=$("email").value.trim(),ok=st.s!==null&&st.d&&st.h&&n&&t&&e.indexOf("@")>0,a=$("enviar"),r=$("resumen");
   if(ok){var f=fecha(st.d).toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
     r.textContent=S[st.s].n+" · "+f+" a las "+st.h;
     a.href="https://wa.me/34622098402?text="+encodeURIComponent("Hola Pablo, soy "+n+". Quiero reservar: "+S[st.s].n+" el "+f+" a las "+st.h+".");a.classList.remove("off")}
-  else{r.textContent="Completa servicio, día, hora, nombre y teléfono para continuar.";a.href="#reservar";a.classList.add("off")}
+  else{r.textContent="Completa servicio, día, hora, nombre, teléfono y correo para continuar.";a.href="#reservar";a.classList.add("off")}
 }
 // RESERVAS AUTOMÁTICAS: pega aquí la URL de tu Apps Script (mira el LEEME). Si está vacía, la solicitud se envía por WhatsApp.
 var API="https://script.google.com/macros/s/AKfycbwFkh1IPEJUXdLsSPvY5uhpBelGK7cyUvfB_zJFIAdgGohIroOp3-1K9ukIhWIsuSKgzg/exec";
 function cargar(){if(!API)return;fetch(API+"?accion=ocupadas").then(function(r){return r.json()}).then(function(j){O=j.ocupadas||[];render()}).catch(function(){})}
-$("nombre").addEventListener("input",upd);$("tel").addEventListener("input",upd);
+$("nombre").addEventListener("input",upd);$("tel").addEventListener("input",upd);$("email").addEventListener("input",upd);
 $("enviar").addEventListener("click",function(e){
   if(!API||this.classList.contains("off"))return;
   e.preventDefault();
   var b=this,res=$("resultado"),n=$("nombre").value.trim(),dia=st.d,hora=st.h,sv=S[st.s];
   var f=fecha(dia).toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
   b.classList.add("off");res.textContent="Reservando…";
-  fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({servicio:sv.n,precio:sv.p,dia:dia,hora:hora,nombre:n,telefono:$("tel").value.trim(),nota:$("nota").value.trim()})})
+  fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({servicio:sv.n,precio:sv.p,dia:dia,hora:hora,nombre:n,telefono:$("tel").value.trim(),nota:$("nota").value.trim(),dur:sv.m,email:$("email").value.trim(),web:$("web").value})})
   .then(function(r){return r.json()}).then(function(j){
-    if(j.ok){O.push(dia+" "+hora);st.h=null;render();res.textContent="¡Listo, "+n+"! Tu cita está reservada: "+sv.n+", "+f+" a las "+hora+". Pablo ya ha recibido el aviso y te confirmará por WhatsApp.";}
-    else{res.textContent=j.error==="ocupada"?"Esa hora acaba de reservarse. Elige otra, por favor.":"No se ha podido reservar. Inténtalo de nuevo o escríbenos por WhatsApp.";cargar();b.classList.remove("off");}
+    if(j.ok){O.push({d:dia,h:hora,m:sv.m});st.h=null;render();res.textContent="¡Listo, "+n+"! Tu cita está reservada: "+sv.n+", "+f+" a las "+hora+". Pablo ya ha recibido el aviso Te hemos enviado un correo con los datos y el enlace para cancelarla si no puedes venir.";}
+    else{res.textContent=j.error==="ocupada"?"Esa hora acaba de reservarse. Elige otra, por favor.":j.error==="limite"?"Ya tienes dos citas pendientes. Para más, escríbenos por WhatsApp.":"No se ha podido reservar. Inténtalo de nuevo o escríbenos por WhatsApp.";cargar();b.classList.remove("off");}
   }).catch(function(){res.textContent="No se ha podido reservar. Inténtalo de nuevo o escríbenos por WhatsApp.";b.classList.remove("off");});
 });
+var q=new URLSearchParams(location.search).get("cita");
+if(API&&q){
+  var mc=$("micita"),tx=$("micitaTxt"),cb=$("cancelar"),mr=$("micitaRes");mc.hidden=false;
+  fetch(API+"?accion=cita&codigo="+encodeURIComponent(q)).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){tx.textContent="No hemos encontrado esa cita.";return}
+    var f=fecha(j.dia).toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
+    tx.textContent=j.servicio+", "+f+" a las "+j.hora+". Estado: "+j.estado+".";
+    if(j.puede)cb.hidden=false;
+    else if(j.estado==="Reservada")mr.textContent="Ya no se puede cancelar desde aquí. Escríbenos por WhatsApp.";
+  }).catch(function(){tx.textContent="No se ha podido cargar la cita."});
+  cb.addEventListener("click",function(){
+    cb.hidden=true;mr.textContent="Cancelando…";
+    fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({accion:"cancelar",codigo:q})}).then(function(r){return r.json()}).then(function(j){
+      mr.textContent=j.ok?"Cita cancelada. Si quieres otra hora, puedes reservar más abajo.":"No se ha podido cancelar. Escríbenos por WhatsApp.";
+    }).catch(function(){mr.textContent="No se ha podido cancelar. Escríbenos por WhatsApp.";cb.hidden=false});
+  });
+}
 if(API){$("enviar").textContent="Reservar cita";cargar();}
 render();
 </script>
