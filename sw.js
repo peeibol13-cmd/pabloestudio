@@ -1,6 +1,6 @@
 // Guarda la web en el móvil para que abra rápido y también sin conexión.
 // Si cambias algo en index.html, sube el número de VERSION para que se actualice.
-var VERSION = "pbe-v4";
+var VERSION = "pbe-v5";
 var ARCHIVOS = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", function (e) {
