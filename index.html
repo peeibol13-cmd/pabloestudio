@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<meta name="description" content="PabloEstudio · Peluquería. Reserva tu cita online.">
+<meta name="description" content="PabloEstudio, peluquería. Corte, color y peinado con cita previa. Reserva tu cita online en un minuto.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="PabloEstudio · Peluquería">
+<meta property="og:description" content="Corte, color y peinado con cita previa. Reserva online.">
+<meta property="og:locale" content="es_ES">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HairSalon","name":"PabloEstudio","telephone":"+34622098402","email":"peeibol13@gmail.com","address":{"@type":"PostalAddress","streetAddress":"Calle General Lázaro Cárdenas 1, Jardines 3","postalCode":"14013","addressLocality":"Córdoba","addressCountry":"ES"},"sameAs":["https://instagram.com/pabloog_5"]}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -12,7 +17,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PabloEstudio">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>PabloEstudio · Peluquería</title>
+<title>PabloEstudio · Peluquería · Reserva tu cita online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
@@ -116,6 +121,18 @@ footer b{display:block;font:400 1.3rem var(--serif);color:var(--ivory);letter-sp
 .resumen{margin:0 0 20px;color:var(--sand);min-height:1.7em}
 .btn.off{opacity:.35;pointer-events:none}
 .reserva textarea{resize:vertical}
+.chk{display:flex;gap:10px;align-items:flex-start;margin:0 0 22px;font-size:.95rem;color:var(--sand)}
+.reserva .chk input{width:auto;margin:5px 0 0}
+.cambio .nueva{display:none}
+.hint.nueva{margin:0 0 14px}
+.ph{all:unset;display:block;width:100%;height:100%;cursor:zoom-in}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.93);display:none;place-items:center;z-index:50;cursor:zoom-out}
+#lb.on{display:grid}
+#lb img{max-width:92vw;max-height:88vh}
+.mapa{width:100%;height:300px;border:0;margin-top:36px}
+#privacidad{font-size:.95rem}
+#privacidad p{margin:0 0 .8em}
 .wa{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:25;background:#25d366;color:#000;font:500 .95rem var(--sans);text-decoration:none;padding:12px 20px;border-radius:40px;box-shadow:0 4px 18px rgba(0,0,0,.5)}
 </style>
 </head>
@@ -166,19 +183,19 @@ footer b{display:block;font:400 1.3rem var(--serif);color:var(--ivory);letter-sp
     <div class="wrap">
       <h2>Tu cita</h2>
       <p class="intro" id="micitaTxt">Cargando…</p>
-      <button class="btn" id="cancelar" type="button" hidden>Cancelar mi cita</button>
+      <button class="btn solid" id="cambiar" type="button" hidden>Cambiar la hora</button> <button class="btn" id="cancelar" type="button" hidden>Cancelar mi cita</button>
       <p class="resumen" id="micitaRes" role="status"></p>
     </div>
   </section>
 
   <section id="reservar">
     <div class="wrap reserva">
-      <h2>Reserva tu cita</h2>
+      <h2 id="rh">Reserva tu cita</h2>
       <p class="intro">Elige el servicio, el día y la hora. Al reservar, Pablo recibe el aviso y te confirma la cita.</p>
-      <h3>Servicio</h3><div class="opts" id="svc"></div>
+      <div class="nueva"><h3>Servicio</h3><div class="opts" id="svc"></div></div>
       <h3>Día</h3><div class="opts" id="days"></div>
       <h3>Hora</h3><div class="opts" id="hours"></div>
-      <h3><label for="nombre">Tu nombre</label></h3>
+      <div class="nueva"><h3><label for="nombre">Tu nombre</label></h3>
       <input id="nombre" type="text" autocomplete="given-name" placeholder="Nombre">
       <h3><label for="tel">Tu teléfono</label></h3>
       <input id="tel" type="tel" autocomplete="tel" placeholder="600 000 000">
@@ -187,7 +204,9 @@ footer b{display:block;font:400 1.3rem var(--serif);color:var(--ivory);letter-sp
       <input id="web" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
       <h3><label for="nota">¿Quieres contarnos algo? (opcional)</label></h3>
       <textarea id="nota" rows="3" placeholder="Por ejemplo: el corte o el color que te gusta"></textarea>
+      <label class="chk"><input type="checkbox" id="acepto"><span>He leído y acepto la <a href="#privacidad">política de privacidad</a>.</span></label></div>
       <p class="resumen" id="resumen" aria-live="polite"></p>
+      <p class="hint nueva">Recibirás la confirmación por correo. Si no te llega, mira en la carpeta de spam.</p>
       <a class="btn solid off" id="enviar" href="#reservar" target="_blank" rel="noopener">Enviar solicitud por WhatsApp</a>
       <p class="resumen" id="resultado" role="status"></p>
     </div>
@@ -209,6 +228,14 @@ footer b{display:block;font:400 1.3rem var(--serif);color:var(--ivory);letter-sp
       <h2>Nuestros trabajos</h2>
       <p class="intro">Una muestra de los cortes y colores que hacemos en el estudio.</p>
       <div class="galeria" id="grid" aria-label="Galería de trabajos"></div>
+      <p class="centro" id="igp" hidden><a class="btn" id="ig" target="_blank" rel="noopener">Ver más en Instagram</a></p>
+    </div>
+  </section>
+
+  <section id="resenas" hidden>
+    <div class="wrap">
+      <h2>Lo que dicen nuestros clientes</h2>
+      <div class="resenas" id="rs" style="margin-top:36px"></div>
     </div>
   </section>
 
@@ -218,19 +245,38 @@ footer b{display:block;font:400 1.3rem var(--serif);color:var(--ivory);letter-sp
       <div class="contacto" style="margin-top:36px">
         <div><h3>Teléfono</h3><p>Vía WhatsApp<br><a href="https://wa.me/34622098402" target="_blank" rel="noopener">622 09 84 02</a></p></div>
         <div><h3>Correo</h3><p><a href="mailto:peeibol13@gmail.com">peeibol13@gmail.com</a></p></div>
+        <div><h3>Horario</h3><p id="horario"></p></div>
+        <div id="dir" hidden><h3>Dirección</h3><p><a id="dirt" target="_blank" rel="noopener"></a></p></div>
       </div>
+    </div>
+  </section>
+<section id="privacidad">
+    <div class="wrap texto">
+      <h2>Política de privacidad</h2>
+      <p><b>Quién trata tus datos:</b> PabloEstudio (peeibol13@gmail.com).</p>
+      <p><b>Para qué:</b> gestionar tu cita (reservarla, cambiarla o cancelarla) y enviarte la confirmación y un recordatorio por correo. No los usamos para publicidad.</p>
+      <p><b>Qué datos:</b> nombre, teléfono, correo, servicio, fecha y hora, y la nota que escribas.</p>
+      <p><b>Por qué podemos tratarlos:</b> porque los das al reservar y aceptar esta política.</p>
+      <p><b>Quién más los ve:</b> Google (la hoja de cálculo y el correo que usamos para gestionar las citas). No los vendemos ni los cedemos a nadie más.</p>
+      <p><b>Cuánto tiempo:</b> el necesario para atender tu cita y mientras haya obligaciones legales.</p>
+      <p><b>Tus derechos:</b> puedes pedir acceso, corrección o borrado de tus datos escribiendo al correo de arriba. Si crees que no los tratamos bien, puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).</p>
     </div>
   </section>
 </main>
 
-<footer><b>PABLOESTUDIO</b>Peluquería</footer>
+<div id="lb" role="dialog" aria-label="Foto ampliada"><img alt="Trabajo ampliado"></div>
+<footer><b>PABLOESTUDIO</b>Peluquería<br><a href="#privacidad">Política de privacidad</a></footer>
 <a class="wa" href="https://wa.me/34622098402" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">WhatsApp</a>
 
 <script>
 // Tonos nude, rosa y marrón como huecos para las fotos reales
+// DATOS DEL NEGOCIO: rellena lo que tengas. Lo que dejes vacío no se muestra.
+// FOTOS: ["fotos/1.jpg","fotos/2.jpg"] (sube las fotos a una carpeta "fotos" en GitHub). RESENAS: [{t:"Texto",n:"Nombre"}]
+var DIRECCION="Calle General Lázaro Cárdenas 1, Jardines 3, 14013 Córdoba",INSTAGRAM="https://instagram.com/pabloog_5",FOTO_PABLO="fotos/pablo.jpg",FOTOS=["fotos/1.jpg","fotos/2.jpg","fotos/3.jpg"],RESENAS=[{t:"Me ha gustado mucho el corte.",n:"Manuel"},{t:"Muy simpático.",n:"Fede"}];
 var t=[["#e3cfae","#b8935f"],["#3a2a20","#120c08"],["#c58b5c","#7a4a2a"],["#f0e6d6","#cdbba0"],["#6b4a3e","#2e1d18"],["#d9b98c","#9a7240"],["#1c1612","#000"],["#b9a38a","#6f5b46"]];
 var g=document.getElementById("grid"),h="";
-for(var i=0;i<16;i++){var c=t[(i*3)%t.length];h+='<figure style="--c1:'+c[0]+';--c2:'+c[1]+'"></figure>';}
+if(FOTOS.length){FOTOS.forEach(function(u){h+='<figure><button type="button" class="ph" data-u="'+u+'"><img src="'+u+'" alt="Trabajo de PabloEstudio" loading="lazy"></button></figure>'})}
+else{for(var i=0;i<16;i++){var c=t[(i*3)%t.length];h+='<figure style="--c1:'+c[0]+';--c2:'+c[1]+'"></figure>';}}
 g.innerHTML=h;
 </script>
 <script>
@@ -239,7 +285,7 @@ g.innerHTML=h;
 // OCUPADAS: citas ya cogidas, con el formato "2026-11-24 10:00".
 var S=[{n:"Corte caballero",p:14,m:30},{n:"Corte + barba",p:20,m:45},{n:"Corte señora",p:25,m:45},{n:"Tinte",p:35,m:90},{n:"Mechas / balayage",p:60,m:150}];
 var A=[["10:00","14:00"],["16:00","20:00"]],H={1:A,2:A,3:A,4:A,5:A,6:[["10:00","14:00"]]},O=[],PASO=30;
-var st={s:null,d:null,h:null},$=function(i){return document.getElementById(i)};
+var modo=null,cur=null,st={s:null,d:null,h:null},$=function(i){return document.getElementById(i)};
 function key(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
 function opt(t,on,fn,dis){var b=document.createElement("button");b.type="button";b.className="opt";b.textContent=t;b.setAttribute("aria-pressed",on);b.disabled=!!dis;b.onclick=fn;return b}
 function fecha(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
@@ -254,47 +300,56 @@ function render(){
   if(st.s===null||!st.d){hr.innerHTML='<span class="hint">Elige primero el servicio y el día.</span>'}
   else{var dur=S[st.s].m,hoy=st.d===key(now),nm=now.getHours()*60+now.getMinutes(),any=false;
     (H[fecha(st.d).getDay()]||[]).forEach(function(b){for(var a=mn(b[0]);a+dur<=mn(b[1]);a+=PASO){
-      var busy=O.some(function(o){return o.d===st.d&&a<mn(o.h)+o.m&&mn(o.h)<a+dur});
+      var busy=O.some(function(o){return !(modo&&cur&&o.d===cur.d&&o.h===cur.h)&&o.d===st.d&&a<mn(o.h)+o.m&&mn(o.h)<a+dur});
       if(busy||(hoy&&a<=nm))continue;any=true;
       (function(t){hr.appendChild(opt(t,st.h===t,function(){st.h=t;render()}))})(hm(a))}});
     if(!any)hr.innerHTML='<span class="hint">No quedan horas libres ese día.</span>'}
   upd();
 }
 function upd(){
-  var n=$("nombre").value.trim(),t=$("tel").value.trim(),e=$("email").value.trim(),ok=st.s!==null&&st.d&&st.h&&n&&t&&e.indexOf("@")>0,a=$("enviar"),r=$("resumen");
+  var n=$("nombre").value.trim(),t=$("tel").value.trim(),e=$("email").value.trim(),ok=modo?(st.d&&st.h):(st.s!==null&&st.d&&st.h&&n&&t&&e.indexOf("@")>0&&$("acepto").checked),a=$("enviar"),r=$("resumen");
   if(ok){var f=fecha(st.d).toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
     r.textContent=S[st.s].n+" · "+f+" a las "+st.h;
     a.href="https://wa.me/34622098402?text="+encodeURIComponent("Hola Pablo, soy "+n+". Quiero reservar: "+S[st.s].n+" el "+f+" a las "+st.h+".");a.classList.remove("off")}
-  else{r.textContent="Completa servicio, día, hora, nombre, teléfono y correo para continuar.";a.href="#reservar";a.classList.add("off")}
+  else{r.textContent=(modo?"Elige el día y la hora nuevos.":"Completa servicio, día, hora, nombre, teléfono y correo, y acepta la política de privacidad para continuar.");a.href="#reservar";a.classList.add("off")}
 }
 // RESERVAS AUTOMÁTICAS: pega aquí la URL de tu Apps Script (mira el LEEME). Si está vacía, la solicitud se envía por WhatsApp.
 var API="https://script.google.com/macros/s/AKfycbwFkh1IPEJUXdLsSPvY5uhpBelGK7cyUvfB_zJFIAdgGohIroOp3-1K9ukIhWIsuSKgzg/exec";
 function cargar(){if(!API)return;fetch(API+"?accion=ocupadas").then(function(r){return r.json()}).then(function(j){O=j.ocupadas||[];render()}).catch(function(){})}
-$("nombre").addEventListener("input",upd);$("tel").addEventListener("input",upd);$("email").addEventListener("input",upd);
+$("nombre").addEventListener("input",upd);$("tel").addEventListener("input",upd);$("email").addEventListener("input",upd);$("acepto").addEventListener("change",upd);
 $("enviar").addEventListener("click",function(e){
   if(!API||this.classList.contains("off"))return;
   e.preventDefault();
   var b=this,res=$("resultado"),n=$("nombre").value.trim(),dia=st.d,hora=st.h,sv=S[st.s];
   var f=fecha(dia).toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
+  if(modo){cambio(b,res,dia,hora,f);return}
   b.classList.add("off");res.textContent="Reservando…";
-  fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({servicio:sv.n,precio:sv.p,dia:dia,hora:hora,nombre:n,telefono:$("tel").value.trim(),nota:$("nota").value.trim(),dur:sv.m,email:$("email").value.trim(),web:$("web").value})})
+  fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({servicio:sv.n,precio:sv.p,dia:dia,hora:hora,nombre:n,telefono:$("tel").value.trim(),nota:$("nota").value.trim(),dur:sv.m,email:$("email").value.trim(),web:$("web").value,acepto:true})})
   .then(function(r){return r.json()}).then(function(j){
-    if(j.ok){O.push({d:dia,h:hora,m:sv.m});st.h=null;render();res.textContent="¡Listo, "+n+"! Tu cita está reservada: "+sv.n+", "+f+" a las "+hora+". Pablo ya ha recibido el aviso Te hemos enviado un correo con los datos y el enlace para cancelarla si no puedes venir.";}
+    if(j.ok){O.push({d:dia,h:hora,m:sv.m});st.h=null;render();res.textContent="¡Listo, "+n+"! Tu cita está reservada: "+sv.n+", "+f+" a las "+hora+". Pablo ya ha recibido el aviso Te hemos enviado un correo con los datos y el enlace para cancelarla si no puedes venir. Si no lo ves, mira en la carpeta de spam.";}
     else{res.textContent=j.error==="ocupada"?"Esa hora acaba de reservarse. Elige otra, por favor.":j.error==="limite"?"Ya tienes dos citas pendientes. Para más, escríbenos por WhatsApp.":"No se ha podido reservar. Inténtalo de nuevo o escríbenos por WhatsApp.";cargar();b.classList.remove("off");}
   }).catch(function(){res.textContent="No se ha podido reservar. Inténtalo de nuevo o escríbenos por WhatsApp.";b.classList.remove("off");});
 });
+function cambio(b,res,dia,hora,f){
+  b.classList.add("off");res.textContent="Cambiando…";
+  fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({accion:"cambiar",codigo:modo,dia:dia,hora:hora})}).then(function(r){return r.json()}).then(function(j){
+    if(j.ok){res.textContent="¡Hecho! Tu cita ahora es "+f+" a las "+hora+". Te hemos enviado un correo con el cambio.";$("micitaTxt").textContent="Cita cambiada: "+f+" a las "+hora+".";$("cambiar").hidden=true;$("cancelar").hidden=true;modo=null;cur=null;$("reservar").classList.remove("cambio");$("rh").textContent="Reserva tu cita";$("enviar").textContent="Reservar cita";st.s=null;st.d=null;st.h=null;cargar();render();$("micita").scrollIntoView({behavior:"smooth"})}
+    else{res.textContent=j.error==="ocupada"?"Esa hora acaba de reservarse. Elige otra.":j.error==="tarde"?"Ya no se puede cambiar desde aquí. Escríbenos por WhatsApp.":"No se ha podido cambiar. Inténtalo de nuevo o escríbenos por WhatsApp.";cargar();b.classList.remove("off")}
+  }).catch(function(){res.textContent="No se ha podido cambiar. Inténtalo de nuevo o escríbenos por WhatsApp.";b.classList.remove("off")});
+}
 var q=new URLSearchParams(location.search).get("cita");
 if(API&&q){
-  var mc=$("micita"),tx=$("micitaTxt"),cb=$("cancelar"),mr=$("micitaRes");mc.hidden=false;
+  var ix=-1,mc=$("micita"),tx=$("micitaTxt"),cb=$("cancelar"),mr=$("micitaRes");mc.hidden=false;
   fetch(API+"?accion=cita&codigo="+encodeURIComponent(q)).then(function(r){return r.json()}).then(function(j){
     if(!j.ok){tx.textContent="No hemos encontrado esa cita.";return}
     var f=fecha(j.dia).toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
-    tx.textContent=j.servicio+", "+f+" a las "+j.hora+". Estado: "+j.estado+".";
-    if(j.puede)cb.hidden=false;
+    tx.textContent=j.servicio+", "+f+" a las "+j.hora+". Estado: "+j.estado+".";cur={d:j.dia,h:j.hora};S.forEach(function(x,i){if(x.n===j.servicio)ix=i});if(ix<0){S.push({n:j.servicio,p:0,m:j.dur||30});ix=S.length-1}
+    if(j.puede){cb.hidden=false;$("cambiar").hidden=false}
     else if(j.estado==="Reservada")mr.textContent="Ya no se puede cancelar desde aquí. Escríbenos por WhatsApp.";
   }).catch(function(){tx.textContent="No se ha podido cargar la cita."});
+  $("cambiar").addEventListener("click",function(){modo=q;st.s=ix;st.d=null;st.h=null;var rv=$("reservar");rv.classList.add("cambio");$("rh").textContent="Elige la nueva hora";$("enviar").textContent="Confirmar el cambio";rv.scrollIntoView({behavior:"smooth"});render()});
   cb.addEventListener("click",function(){
-    cb.hidden=true;mr.textContent="Cancelando…";
+    cb.hidden=true;$("cambiar").hidden=true;mr.textContent="Cancelando…";
     fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({accion:"cancelar",codigo:q})}).then(function(r){return r.json()}).then(function(j){
       mr.textContent=j.ok?"Cita cancelada. Si quieres otra hora, puedes reservar más abajo.":"No se ha podido cancelar. Escríbenos por WhatsApp.";
     }).catch(function(){mr.textContent="No se ha podido cancelar. Escríbenos por WhatsApp.";cb.hidden=false});
@@ -302,6 +357,16 @@ if(API&&q){
 }
 if(API){$("enviar").textContent="Reservar cita";cargar();}
 render();
+// Horario, dirección, Instagram, foto, reseñas y fotos ampliables, según los datos de arriba
+var DN=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],gr=[];
+[1,2,3,4,5,6,0].forEach(function(d){var k=JSON.stringify(H[d]||[]),l=gr[gr.length-1];if(l&&l.k===k)l.f=d;else gr.push({k:k,a:d,f:d})});
+$("horario").innerHTML=gr.map(function(x){var tr=(H[x.a]||[]).map(function(b){return b[0]+"–"+b[1]}).join(" y ")||"Cerrado";return (x.a===x.f?DN[x.a]:DN[x.a]+" a "+DN[x.f])+": "+tr}).join("<br>");
+if(DIRECCION){$("dir").hidden=false;var da=$("dirt");da.textContent=DIRECCION;da.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(DIRECCION);var fr=document.createElement("iframe");fr.src="https://maps.google.com/maps?q="+encodeURIComponent(DIRECCION)+"&output=embed";fr.title="Mapa";fr.loading="lazy";fr.className="mapa";$("dir").parentNode.parentNode.appendChild(fr)}
+if(INSTAGRAM){$("igp").hidden=false;$("ig").href=INSTAGRAM}
+if(FOTO_PABLO){var rt=document.querySelector(".retrato");rt.textContent="";rt.style.background="url('"+FOTO_PABLO+"') center/cover"}
+if(RESENAS.length){$("resenas").hidden=false;RESENAS.forEach(function(r){var b=document.createElement("blockquote"),p=document.createElement("p"),c=document.createElement("cite");b.innerHTML='<div class="stars" aria-hidden="true">★★★★★</div>';p.textContent=r.t;c.textContent=r.n;b.appendChild(p);b.appendChild(c);$("rs").appendChild(b)})}
+$("grid").addEventListener("click",function(e){var b=e.target.closest(".ph");if(!b)return;var l=$("lb");l.querySelector("img").src=b.dataset.u;l.classList.add("on")});
+$("lb").addEventListener("click",function(){this.classList.remove("on")});
 </script>
 <script>
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
